@@ -1,6 +1,6 @@
 services:
-  - type: worker
-    name: careerwill-bot
+  - type: web
+    name: cwbot-web
     runtime: python
     repo: https://github.com/ppp973/cwbot
     branch: main
