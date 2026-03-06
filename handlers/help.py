@@ -1,46 +1,39 @@
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import Message
 from config import COLORS
 
-async def start_command(client, message: Message):
-    """Handle /start command"""
+async def help_command(client, message: Message):
+    """Handle /help command"""
     
     text = f"""
-{COLORS['primary']} **Welcome to CareerWill Premium Bot** {COLORS['primary']}
+{COLORS['info']} **CareerWill Bot Help Guide** {COLORS['info']}
 
 ━━━━━━━━━━━━━━━━━━━━━━
-**✨ Features:**
+**📥 /cwextractfree**
 
-{COLORS['batch']} **Batch Extraction**
-├ Extract any CareerWill batch
-├ Videos + PDFs support
-└ DRM detection
-
-{COLORS['stats']} **Live Progress**
-├ Real-time tracking
-├ Time estimation
-└ Detailed stats
+Step-by-Step:
+1️⃣ Send `/cwextractfree`
+2️⃣ Enter Batch ID (e.g., `1377`)
+3️⃣ Watch extraction progress
+4️⃣ Receive .txt file
 
 ━━━━━━━━━━━━━━━━━━━━━━
-**📋 Commands:**
+**📚 /allbatches**
 
-{COLORS['primary']} **/start** - This message
-{COLORS['info']} **/help** - Help guide
-{COLORS['video']} **/cwextractfree** - Extract batch
-{COLORS['batch']} **/allbatches** - View batches
+Features:
+├ Complete batch list
+├ Click to copy IDs
+├ Paginated view
+└ Search option
 
 ━━━━━━━━━━━━━━━━━━━━━━
-**⚡ Made with ❤️**
+**💡 Tips:**
+
+{COLORS['success']} Multiple IDs: `1377 1840 2034`
+{COLORS['drm']} DRM videos are marked
+{COLORS['time']} 20 parallel workers
+
+━━━━━━━━━━━━━━━━━━━━━━
+**⚡ @sdfvghhghhbnm_bot**
 """
     
-    keyboard = InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("📥 Extract", callback_data="extract"),
-            InlineKeyboardButton("📚 Batches", callback_data="batches")
-        ],
-        [
-            InlineKeyboardButton("❓ Help", callback_data="help"),
-            InlineKeyboardButton("ℹ️ About", callback_data="about")
-        ]
-    ])
-    
-    await message.reply_text(text, reply_markup=keyboard)
+    await message.reply_text(text)
