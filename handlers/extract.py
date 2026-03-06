@@ -8,8 +8,30 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Store user states
+user_states = {}
+
+async def extract_command(client, message: Message):
+    """Handle /cwextractfree command"""
+    user_id = message.from_user.id
+    
+    msg = await message.reply_text(
+        f"{COLORS['batch']} **CareerWill Extractor**\n\n"
+        f"{COLORS['info']} **Please enter Batch ID(s):**\n"
+        f"Example: `1377`\n"
+        f"Multiple: `1377 1840 2034`"
+    )
+    
+    # Store user state
+    user_states[user_id] = {
+        "step": "waiting_for_batch",
+        "msg_id": msg.id
+    }
+    
+    logger.info(f"User {user_id} started extraction")
+
 async def handle_batch_input(client, message: Message, state):
-    """Handle batch ID input"""
+    """Handle batch ID input from user"""
     user_id = message.from_user.id
     batch_input = message.text.strip()
     
@@ -17,8 +39,8 @@ async def handle_batch_input(client, message: Message, state):
         await message.delete()
         status = await client.get_messages(message.chat.id, state["msg_id"])
         await status.delete()
-    except:
-        pass
+    except Exception as e:
+        logger.error(f"Error getting status message: {e}")
     
     # Parse batch IDs
     if " " in batch_input:
@@ -31,7 +53,7 @@ async def handle_batch_input(client, message: Message, state):
         if not batch_id:
             continue
         
-        # Validate
+        # Validate batch ID
         if not validate_batch(batch_id):
             await message.reply_text(f"{COLORS['error']} Invalid ID: `{batch_id}`")
             continue
@@ -41,17 +63,17 @@ async def handle_batch_input(client, message: Message, state):
             f"{COLORS['processing']} Processing {idx}/{len(batch_ids)}: `{batch_id}`"
         )
         
-        def update(text):
+        def update_progress(text):
             asyncio.create_task(progress.edit(text))
         
-        # Extract
-        stats = extract_batch(batch_id, update)
+        # Extract batch
+        stats = extract_batch(batch_id, update_progress)
         
         if not stats:
             await progress.edit(f"{COLORS['error']} Extraction failed")
             continue
         
-        # Save file
+        # Save to file
         filename = await save_to_file(
             stats['name'],
             batch_id,
@@ -83,7 +105,7 @@ async def handle_batch_input(client, message: Message, state):
             caption=caption
         )
         
-        # Log to channel
+        # Log to channel if configured
         if CHANNEL_ID:
             try:
                 await client.send_document(
@@ -91,9 +113,18 @@ async def handle_batch_input(client, message: Message, state):
                     filename,
                     caption=f"New: {stats['name'][:50]}"
                 )
-            except:
-                pass
+            except Exception as e:
+                logger.error(f"Channel log error: {e}")
         
-        # Cleanup
+        # Cleanup file
         await cleanup_file(filename)
+        
+        # Update progress message
         await progress.edit(f"{COLORS['success']} Batch {batch_id} completed!")
+    
+    # Clear user state
+    if user_id in user_states:
+        del user_states[user_id]
+
+# Export functions
+__all__ = ['extract_command', 'handle_batch_input']
