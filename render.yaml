@@ -1,0 +1,16 @@
+services:
+  - type: worker
+    name: careerwill-bot
+    runtime: python
+    repo: https://github.com/ppp973/cwbot
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: API_ID
+        value: 21503125
+      - key: API_HASH
+        value: bab9855c442e9e4e87f413cb5b9dc3f9
+      - key: BOT_TOKEN
+        value: 8768725493:AAFDhnWucAWD9Tl9djbRtOr6v5bUUOFmCQY
+    plan: free
